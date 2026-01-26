@@ -25,97 +25,70 @@ public:
     }
 };
 
-void markParents(Node *root, map<Node *, Node *> &marked_parnets)
+void markParentPointers(Node *root, map<Node *, Node *> &markParent)
 {
-    if (root == NULL)
-        return;
+    if (root == NULL)return;
     queue<Node *> q;
     q.push(root);
     while (!q.empty())
     {
         Node *currNode = q.front();
         q.pop();
+
         if (currNode->left)
         {
-            marked_parnets[currNode->left] = currNode;
+            markParent[currNode->left] = currNode;
             q.push(currNode->left);
         }
         if (currNode->right)
         {
-            marked_parnets[currNode->right] = currNode;
+            markParent[currNode->right] = currNode;
             q.push(currNode->right);
         }
     }
 }
 
-vector<int> nodesDistanceK(Node *root, int target, int k)
+int timeBurningBT(Node *root, Node *node)
 {
-    vector<int>ans;
-    map<Node *, Node *> marked_parnets;
-    markParents(root, marked_parnets);
-    map<int, bool> visited;
+    map<Node *, Node *> markParent;
+    markParentPointers(root, markParent);
     queue<Node *> q;
-
-    Node* targetNode=NULL;
-    queue<Node*>qq;
-    qq.push(root);
-    while (!qq.empty()){
-        Node* node=qq.front();
-        qq.pop();
-        if(node->data==target) {
-            targetNode=node;
-            break;
-        }
-
-        if (node->left)  qq.push(node->left);
-    if (node->right) qq.push(node->right);
-
-    }
-
-    q.push(targetNode);
-    visited[target] = true;
-     int level = 0;
-    
+    map<Node *, bool> visited;
+    q.push(node);
+    visited[node]=true;
+    int time = 0;
+   
     while (!q.empty())
     {
         int n = q.size();
-       
-        if (level == k)
-            break;
+        bool burned=false;
         for (int i = 0; i < n; i++)
         {
             Node *currNode = q.front();
             q.pop();
-            if (currNode->left && !visited[currNode->left->data])
+            if (currNode->left && !visited[currNode->left])
             {
                 q.push(currNode->left);
-                visited[currNode->left->data] = true;
+                visited[currNode->left]=true;
+                burned=true;
             }
-            if (currNode->right && !visited[currNode->right->data])
+            if (currNode->right && !visited[currNode->right])
             {
                 q.push(currNode->right);
-                visited[currNode->right->data] = true;
+                visited[currNode->right]=true;
+                 burned=true;
             }
-            if (marked_parnets[currNode] && !visited[marked_parnets[currNode]->data])
-            {
-                q.push(marked_parnets[currNode]);
-                visited[marked_parnets[currNode]->data] = true;
+            if(markParent[currNode] && !visited[markParent[currNode]]){
+                visited[markParent[currNode]]=true;
+                q.push(markParent[currNode]);
+                 burned=true;
             }
         }
-        level++;
+        if(burned)time++;
     }
-   
-    while (!q.empty())
-    {
-        ans.push_back(q.front()->data);
-        q.pop();
-    }
-
-    return ans;
+    return time;
 }
-
-int main()
-{
+    int main(){
     //         1
     //       /   \
     //      2     3
@@ -140,10 +113,5 @@ int main()
 
     root->right->right->left = new Node(9);
     root->right->right->right = new Node(10);
-
-    
-    for(auto x:nodesDistanceK(root,5,2)){
-        cout<<x<<" ";
+        cout<<timeBurningBT(root,root)<<endl;
     }
-   
-}
